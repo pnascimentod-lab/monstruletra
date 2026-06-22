@@ -1086,66 +1086,8 @@ function copyPrompt(id){var el=document.getElementById('prompt-'+id);if(!el)retu
 function closeAllPanels(){document.querySelectorAll('.letra-panel,.prompt-panel').forEach(function(p){p.classList.remove('open');});var ov=document.getElementById('overlay');if(ov)ov.classList.remove('show');}
 
 function refreshSelectScreen(){
-  MUSICAS.forEach(function(m,i){
-    var card=document.getElementById('mcard-'+m.id);if(!card)return;
-    var ok=i===0||musicasCompletas[MUSICAS[i-1].id];
-    card.className=ok?'music-card unlocked':'music-card locked-card';
-    card.onclick=ok?(function(x){return function(){selectMusica(x);};})(i):null;
-    var badge=document.getElementById('badge-'+m.id);if(badge)badge.style.display=musicasCompletas[m.id]?'inline-block':'none';
-    // Also hide lock icon and restore color when unlocked
-    var cardEl=document.getElementById('mcard-'+m.id);
-    if(cardEl){
-      var lockIcon=cardEl.querySelector('.mbadge-lock');
-      if(lockIcon)lockIcon.style.display=ok?'none':'inline-block';
-      var mnumEl=cardEl.querySelector('.mnum');
-      if(mnumEl&&ok){
-        var mnumColors=['rgba(135,95,205,.4)','rgba(41,170,234,.35)','rgba(46,204,113,.35)','rgba(253,194,67,.35)','rgba(255,100,100,.35)'];
-        mnumEl.style.background=mnumColors[i]||mnumColors[0];
-        mnumEl.style.color='white';
-      }
-    }
-    var sel=document.getElementById('mstars-'+m.id);
-    if(sel&&musicasCompletas[m.id]){var s=musicasCompletas[m.id].stars||0,h='';for(var x=0;x<3;x++)h+='<span class="ms" style="color:'+(x<s?'var(--amber)':'rgba(255,255,255,.2)')+'">&#9733;</span>';sel.innerHTML=h;}
-  });
-  // Sincronizar fase bônus com progresso atual
-  var totalFeitas=Object.keys(musicasCompletas).length;
-  // Sincronizar botão ouvir
-  var bo=document.getElementById('btn-ouvir');
-  var boSub=document.getElementById('btn-ouvir-sub');
-  if(bo){
-    if(totalFeitas>0){
-      bo.style.opacity='1';bo.style.pointerEvents='auto';
-      if(boSub)boSub.textContent=totalFeitas+' MÚSICA'+(totalFeitas>1?'S':'')+ ' DISPONÍVEL'+(totalFeitas>1?'IS':'');
-    } else {
-      bo.style.opacity='.4';bo.style.pointerEvents='none';
-      if(boSub)boSub.textContent='COMPLETE MÚSICAS PARA LIBERAR';
-    }
-  }
-  var bc=document.getElementById('bonus-card');
-  var bb=document.getElementById('bonus-badge');
-  var bs=document.getElementById('bonus-sub');
-  if(bc){
-    if(totalFeitas>=MUSICAS.length){
-      bc.style.opacity='1';bc.style.cursor='pointer';bc.dataset.unlocked='1';
-      if(bb){bb.textContent='NOVO!';bb.style.background='var(--amber)';bb.style.color='var(--amber-d)';}
-      if(bs)bs.textContent='TOQUE PARA JOGAR!';
-    } else {
-      var faltando2=MUSICAS.length-totalFeitas;
-      bc.style.opacity='.45';bc.style.cursor='default';bc.dataset.unlocked='0';
-      if(bb){bb.textContent='BLOQUEADA';bb.style.background='rgba(255,255,255,.15)';bb.style.color='rgba(255,255,255,.5)';}
-      if(bs)bs.textContent='COMPLETE AS 5 MÚSICAS ('+faltando2+' FALTANDO)';
-    }
-  }
+  buildSelectScreen();
 }
-
-
-// ══ FASE LIGAR ══════════════════════════════════════════════════════════════
-var SVGS_LIGAR = {"ABELHA": "<svg viewBox=\"0 0 60 60\"><ellipse cx=\"30\" cy=\"32\" rx=\"12\" ry=\"15\" fill=\"#fdc243\"/><line x1=\"20\" y1=\"25\" x2=\"40\" y2=\"25\" stroke=\"#555\" stroke-width=\"2.5\"/><line x1=\"20\" y1=\"30\" x2=\"40\" y2=\"30\" stroke=\"#555\" stroke-width=\"2.5\"/><line x1=\"20\" y1=\"35\" x2=\"40\" y2=\"35\" stroke=\"#555\" stroke-width=\"2.5\"/><ellipse cx=\"30\" cy=\"19\" rx=\"7\" ry=\"6\" fill=\"#fdc243\"/><circle cx=\"27\" cy=\"18\" r=\"1.5\" fill=\"#333\"/><circle cx=\"33\" cy=\"18\" r=\"1.5\" fill=\"#333\"/><ellipse cx=\"16\" cy=\"25\" rx=\"8\" ry=\"4\" fill=\"rgba(255,255,255,.55)\"/><ellipse cx=\"44\" cy=\"25\" rx=\"8\" ry=\"4\" fill=\"rgba(255,255,255,.55)\"/><text x=\"30\" y=\"56\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">ABELHA</text></svg>", "ANEL": "<svg viewBox=\"0 0 60 60\"><circle cx=\"30\" cy=\"28\" r=\"14\" fill=\"none\" stroke=\"#fdc243\" stroke-width=\"5\"/><circle cx=\"30\" cy=\"14\" r=\"5\" fill=\"#875fcd\"/><circle cx=\"30\" cy=\"14\" r=\"3\" fill=\"#b388ff\"/><text x=\"30\" y=\"56\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">ANEL</text></svg>", "AVIÃO": "<svg viewBox=\"0 0 60 60\"><path d=\"M8 30 L52 18 L44 30 L52 42 Z\" fill=\"#29AAEA\"/><path d=\"M28 30 L20 46 L30 42 Z\" fill=\"#1a7ab5\"/><path d=\"M28 30 L20 14 L30 18 Z\" fill=\"#1a7ab5\"/><circle cx=\"44\" cy=\"30\" r=\"3\" fill=\"#fdc243\"/><text x=\"30\" y=\"58\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">AVIÃO</text></svg>", "ESTRELA": "<svg viewBox=\"0 0 60 60\"><polygon points=\"30,6 34,22 50,22 37,32 42,48 30,38 18,48 23,32 10,22 26,22\" fill=\"#fdc243\" stroke=\"#e8940a\" stroke-width=\"1\"/><text x=\"30\" y=\"58\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">ESTRELA</text></svg>", "ELEFANTE": "<svg viewBox=\"0 0 60 60\"><ellipse cx=\"32\" cy=\"34\" rx=\"16\" ry=\"13\" fill=\"#90A4AE\"/><circle cx=\"30\" cy=\"20\" r=\"11\" fill=\"#90A4AE\"/><ellipse cx=\"22\" cy=\"16\" rx=\"5\" ry=\"7\" fill=\"#90A4AE\"/><ellipse cx=\"38\" cy=\"16\" rx=\"5\" ry=\"7\" fill=\"#90A4AE\"/><ellipse cx=\"22\" cy=\"15\" rx=\"3.5\" ry=\"5.5\" fill=\"#FFCCBC\"/><ellipse cx=\"38\" cy=\"15\" rx=\"3.5\" ry=\"5.5\" fill=\"#FFCCBC\"/><path d=\"M29 28 Q26 36 23 42\" stroke=\"#78909C\" stroke-width=\"3.5\" fill=\"none\" stroke-linecap=\"round\"/><circle cx=\"26\" cy=\"19\" r=\"2\" fill=\"#333\"/><circle cx=\"34\" cy=\"19\" r=\"2\" fill=\"#333\"/><text x=\"30\" y=\"58\" text-anchor=\"middle\" font-size=\"7\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">ELEFANTE</text></svg>", "ESCOLA": "<svg viewBox=\"0 0 60 60\"><rect x=\"10\" y=\"28\" width=\"40\" height=\"26\" fill=\"#875fcd\"/><polygon points=\"10,28 30,14 50,28\" fill=\"#6A3FB5\"/><rect x=\"24\" y=\"36\" width=\"12\" height=\"18\" fill=\"#fdc243\"/><rect x=\"12\" y=\"32\" width=\"9\" height=\"9\" fill=\"#29AAEA\"/><rect x=\"39\" y=\"32\" width=\"9\" height=\"9\" fill=\"#29AAEA\"/><text x=\"30\" y=\"58\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">ESCOLA</text></svg>", "ILHA": "<svg viewBox=\"0 0 60 60\"><ellipse cx=\"30\" cy=\"44\" rx=\"22\" ry=\"8\" fill=\"#29AAEA\" opacity=\".6\"/><ellipse cx=\"30\" cy=\"42\" rx=\"14\" ry=\"6\" fill=\"#fdc243\"/><rect x=\"27\" y=\"22\" width=\"4\" height=\"22\" fill=\"#6D4C41\"/><ellipse cx=\"30\" cy=\"18\" rx=\"10\" ry=\"9\" fill=\"#2ECC71\"/><text x=\"30\" y=\"58\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">ILHA</text></svg>", "IMÃ": "<svg viewBox=\"0 0 60 60\"><path d=\"M16 14 Q16 38 30 38 Q44 38 44 14\" fill=\"none\" stroke=\"#ca35a1\" stroke-width=\"8\" stroke-linecap=\"round\"/><rect x=\"10\" y=\"10\" width=\"14\" height=\"10\" rx=\"2\" fill=\"#ca35a1\"/><rect x=\"36\" y=\"10\" width=\"14\" height=\"10\" rx=\"2\" fill=\"#1a7ab5\"/><rect x=\"10\" y=\"10\" width=\"14\" height=\"5\" rx=\"2\" fill=\"#e05ab0\"/><rect x=\"36\" y=\"10\" width=\"14\" height=\"5\" rx=\"2\" fill=\"#29AAEA\"/><text x=\"30\" y=\"58\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">IMÃ</text></svg>", "INDÍGENA": "<svg viewBox=\"0 0 60 60\"><circle cx=\"30\" cy=\"20\" r=\"10\" fill=\"#FFCC80\"/><rect x=\"22\" y=\"28\" width=\"16\" height=\"18\" fill=\"#E53935\"/><path d=\"M22 28 L14 44 H22 Z\" fill=\"#E53935\"/><path d=\"M38 28 L46 44 H38 Z\" fill=\"#E53935\"/><path d=\"M22 12 Q30 6 38 12\" fill=\"none\" stroke=\"#fdc243\" stroke-width=\"2.5\"/><circle cx=\"26\" cy=\"19\" r=\"1.5\" fill=\"#333\"/><circle cx=\"34\" cy=\"19\" r=\"1.5\" fill=\"#333\"/><text x=\"30\" y=\"58\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">INDÍGENA</text></svg>", "OVO": "<svg viewBox=\"0 0 60 60\"><ellipse cx=\"30\" cy=\"30\" rx=\"15\" ry=\"19\" fill=\"#FFFDE7\" stroke=\"#F9A825\" stroke-width=\"1.5\"/><circle cx=\"30\" cy=\"30\" r=\"8\" fill=\"#FFA726\"/><circle cx=\"26\" cy=\"26\" r=\"3.5\" fill=\"#FFD54F\" opacity=\".8\"/><text x=\"30\" y=\"56\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">OVO</text></svg>", "ONÇA": "<svg viewBox=\"0 0 60 60\"><ellipse cx=\"30\" cy=\"36\" rx=\"16\" ry=\"12\" fill=\"#FFA726\"/><circle cx=\"30\" cy=\"22\" r=\"11\" fill=\"#FFA726\"/><circle cx=\"24\" cy=\"19\" r=\"2\" fill=\"#333\"/><circle cx=\"36\" cy=\"19\" r=\"2\" fill=\"#333\"/><ellipse cx=\"30\" cy=\"26\" rx=\"6\" ry=\"4\" fill=\"#FFCC80\"/><circle cx=\"16\" cy=\"20\" r=\"5\" fill=\"#FFA726\"/><circle cx=\"44\" cy=\"20\" r=\"5\" fill=\"#FFA726\"/><circle cx=\"20\" cy=\"34\" r=\"3\" fill=\"#333\" opacity=\".35\"/><circle cx=\"40\" cy=\"34\" r=\"3\" fill=\"#333\" opacity=\".35\"/><text x=\"30\" y=\"56\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">ONÇA</text></svg>", "ÓCULOS": "<svg viewBox=\"0 0 60 60\"><circle cx=\"20\" cy=\"28\" r=\"10\" fill=\"none\" stroke=\"#875fcd\" stroke-width=\"3\"/><circle cx=\"40\" cy=\"28\" r=\"10\" fill=\"none\" stroke=\"#875fcd\" stroke-width=\"3\"/><line x1=\"30\" y1=\"28\" x2=\"30\" y2=\"28\" stroke=\"#875fcd\" stroke-width=\"3\"/><line x1=\"10\" y1=\"28\" x2=\"6\" y2=\"24\" stroke=\"#875fcd\" stroke-width=\"3\"/><line x1=\"50\" y1=\"28\" x2=\"54\" y2=\"24\" stroke=\"#875fcd\" stroke-width=\"3\"/><circle cx=\"20\" cy=\"28\" r=\"7\" fill=\"rgba(41,170,234,.15)\"/><circle cx=\"40\" cy=\"28\" r=\"7\" fill=\"rgba(41,170,234,.15)\"/><text x=\"30\" y=\"54\" text-anchor=\"middle\" font-size=\"7\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">ÓCULOS</text></svg>", "UVA": "<svg viewBox=\"0 0 60 60\"><circle cx=\"22\" cy=\"22\" r=\"6\" fill=\"#875fcd\"/><circle cx=\"34\" cy=\"22\" r=\"6\" fill=\"#875fcd\"/><circle cx=\"28\" cy=\"16\" r=\"6\" fill=\"#875fcd\"/><circle cx=\"22\" cy=\"33\" r=\"6\" fill=\"#875fcd\"/><circle cx=\"34\" cy=\"33\" r=\"6\" fill=\"#875fcd\"/><circle cx=\"28\" cy=\"39\" r=\"6\" fill=\"#875fcd\"/><circle cx=\"28\" cy=\"27\" r=\"6\" fill=\"#9C4DCC\"/><path d=\"M28 11 Q32 7 36 9\" stroke=\"#2ECC71\" stroke-width=\"2\" fill=\"none\" stroke-linecap=\"round\"/><text x=\"30\" y=\"56\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">UVA</text></svg>", "URSO": "<svg viewBox=\"0 0 60 60\"><ellipse cx=\"30\" cy=\"36\" rx=\"15\" ry=\"13\" fill=\"#8D6E63\"/><circle cx=\"30\" cy=\"22\" r=\"11\" fill=\"#8D6E63\"/><circle cx=\"19\" cy=\"14\" r=\"6\" fill=\"#8D6E63\"/><circle cx=\"41\" cy=\"14\" r=\"6\" fill=\"#8D6E63\"/><circle cx=\"19\" cy=\"14\" r=\"4\" fill=\"#A1887F\"/><circle cx=\"41\" cy=\"14\" r=\"4\" fill=\"#A1887F\"/><ellipse cx=\"30\" cy=\"26\" rx=\"7\" ry=\"5\" fill=\"#A1887F\"/><circle cx=\"26\" cy=\"20\" r=\"2\" fill=\"#333\"/><circle cx=\"34\" cy=\"20\" r=\"2\" fill=\"#333\"/><circle cx=\"30\" cy=\"24\" r=\"1.5\" fill=\"#555\"/><text x=\"30\" y=\"56\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">URSO</text></svg>", "URUBU": "<svg viewBox=\"0 0 60 60\"><ellipse cx=\"30\" cy=\"34\" rx=\"12\" ry=\"10\" fill=\"#444\"/><circle cx=\"30\" cy=\"21\" r=\"9\" fill=\"#444\"/><path d=\"M10 28 Q18 20 30 28\" fill=\"#444\"/><path d=\"M50 28 Q42 20 30 28\" fill=\"#444\"/><circle cx=\"26\" cy=\"20\" r=\"2\" fill=\"#fff\"/><circle cx=\"34\" cy=\"20\" r=\"2\" fill=\"#fff\"/><ellipse cx=\"30\" cy=\"25\" rx=\"5\" ry=\"3.5\" fill=\"#E53935\"/><path d=\"M27 27 L30 31 L33 27\" fill=\"#E53935\"/><text x=\"30\" y=\"54\" text-anchor=\"middle\" font-size=\"8\" font-weight=\"800\" fill=\"white\" font-family=\"Nunito,sans-serif\">URUBU</text></svg>"};
-var VOGAIS_MAP = {"ABELHA": "A", "ANEL": "A", "AVIÃO": "A", "ESTRELA": "E", "ELEFANTE": "E", "ESCOLA": "E", "ILHA": "I", "IMÃ": "I", "INDÍGENA": "I", "OVO": "O", "ONÇA": "O", "ÓCULOS": "O", "UVA": "U", "URSO": "U", "URUBU": "U"};
-
-var ligarAcertos=0, ligarTotal=15;
-var dragVogal=null, ghostEl=null, dragOffX=0, dragOffY=0;
-var ligarOrdem=[]; // ordem embaralhada das imagens
 
 function initLigar(){
   ligarAcertos=0;
@@ -1530,7 +1472,11 @@ function stopOuvir(){
   ouvirPlaying=false;clearInterval(ouvirInterval);
 }
 
-loadMusica(0);
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  buildSelectScreen();
+  loadMusica(0);
+});
 </script>
 </body>
 </html>
